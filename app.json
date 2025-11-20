@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "scheme": "migaleria",
+    "name": "MiGaleria",
+    "slug": "MiGaleria",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/LogoMio.png",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/LogoMio.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.migaleria.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    }
+  }
+}
