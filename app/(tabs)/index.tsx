@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import { Ionicons } from '@expo/vector-icons'; // Íconos
+import * as FileSystem from 'expo-file-system/legacy';
+import * as ImagePicker from 'expo-image-picker';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
 import {
+  Alert,
+  Dimensions,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  Pressable,
   StyleSheet,
   Text,
-  View,
-  Image,
-  FlatList,
   TouchableOpacity,
-  Pressable,
-  Modal,
-  Button,
-  Dimensions,
-  Platform,
-  Alert,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { StatusBar } from 'expo-status-bar';
-import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system/legacy';
 
 // Obtenemos el ancho de la pantalla para calcular el tamaño de las imágenes
 const { width } = Dimensions.get('window');
@@ -28,16 +28,14 @@ type PhotoItem = { id: string; uri: string };
 const PHOTO_MANIFEST = FileSystem.documentDirectory + 'photos.json';
 
 export default function App() {
+  const [darkMode, setDarkMode] = useState(false);
 
   // En esta parte del codigo le agregamos funcionalidad para que tome fotos y las guarde en la galeria
   const takePhotoAsync = async () => {
     // 1. Pedir permisos
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status !== 'granted') {
-      Alert.alert(
-        'Permisos requeridos',
-        'Se necesitan permisos para acceder a la cámara.'
-      );
+      Alert.alert('Permisos requeridos', 'Se necesitan permisos para acceder a la cámara.');
       return;
     }
 
@@ -54,7 +52,7 @@ export default function App() {
       try {
         const dest = FileSystem.documentDirectory + `photo_${Date.now()}.jpg`;
         await FileSystem.copyAsync({ from: capturedUri, to: dest });
-        addPhoto(dest);
+        addPhoto(dest); // Lógica original (persistimos en documentos)
       } catch (e) {
         Alert.alert('Error', 'No se pudo guardar la foto tomada.');
       }
@@ -109,7 +107,6 @@ export default function App() {
     // Generar un ID más robusto evitando colisiones en mismo ms
     let id = Date.now().toString();
     // Si ya existe, añadir sufijo aleatorio
-    // (En escenarios de selección rápida o Fast Refresh se podría repetir)
     setPhotos(prev => {
       while (prev.some(p => p.id === id)) {
         id = `${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
@@ -186,9 +183,9 @@ export default function App() {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, darkMode && styles.containerDark]}>
       <StatusBar style="auto" />
-      <Text style={styles.title}>Galería de Fotos</Text>
+      <Text style={[styles.title, darkMode && styles.titleDark]}>Galería de Fotos</Text>
 
       {/* Botón para agregar nuevas fotos */}
       <View style={styles.buttonRow}>
@@ -197,6 +194,7 @@ export default function App() {
           onPress={pickImageAsync}
           accessibilityLabel="Agregar foto desde galería"
         >
+          <Ionicons name="images" size={18} color="#fff" />
           <Text style={styles.addButtonText}>Galería</Text>
         </Pressable>
         <Pressable
@@ -204,7 +202,16 @@ export default function App() {
           onPress={takePhotoAsync}
           accessibilityLabel="Tomar foto con cámara"
         >
+          <Ionicons name="camera" size={18} color="#fff" />
           <Text style={styles.addButtonText}>Cámara</Text>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.modeButton, pressed && styles.addButtonPressed]}
+          onPress={() => setDarkMode(!darkMode)}
+          accessibilityLabel="Cambiar modo de color"
+        >
+          <Ionicons name={darkMode ? 'sunny' : 'moon'} size={18} color="#fff" />
+          <Text style={styles.addButtonText}>{darkMode ? 'Claro' : 'Oscuro'}</Text>
         </Pressable>
       </View>
 
@@ -232,7 +239,9 @@ export default function App() {
               style={styles.modalImage}
               resizeMode="contain"
             />
-            <Button title="Cerrar" onPress={closeModal} />
+            <Pressable style={styles.closeButton} onPress={closeModal}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </Pressable>
           </View>
         </Modal>
       )}
@@ -241,28 +250,104 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  // --- Layout general ---
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
     // Agregamos padding superior si es Android para evitar la barra de estado
     paddingTop: Platform.OS === 'android' ? 25 : 0,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginVertical: 20,
-    color: '#333',
+  containerDark: {
+    backgroundColor: '#121212',
   },
+
+  // --- Encabezado ---
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginVertical: 16,
+    color: '#222',
+    letterSpacing: 0.5,
+  },
+  titleDark: {
+    color: '#fff',
+  },
+
+  // --- Botones superiores ---
   buttonRow: {
     flexDirection: 'row',
     gap: 12,
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 16,
     justifyContent: 'space-between',
   },
+  addButton: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+    backgroundColor: '#4CAF50',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Sombra iOS
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    // Sombra Android
+    elevation: 3,
+  },
+  cameraButton: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+    backgroundColor: '#2196F3',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  modeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    gap: 6,
+    backgroundColor: '#9C27B0',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+  },
+  addButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+  addButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+
+  // --- Lista / cuadrícula ---
   listContainer: {
     paddingHorizontal: spacing, // Espacio en los bordes de la lista
+    paddingBottom: 24,
   },
   row: {
     justifyContent: 'flex-start', // Alinea las imágenes al inicio
@@ -271,49 +356,40 @@ const styles = StyleSheet.create({
     width: itemSize,
     height: itemSize,
     margin: spacing / 2, // Espacio alrededor de cada foto
-    backgroundColor: '#e1e1e1', // Color mientras carga la imagen
-    borderRadius: 8,
+    backgroundColor: '#e1e1e1', // Placeholder mientras carga
+    borderRadius: 12,
+    // Sombra sutil para las tarjetas
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 2,
   },
+
   // --- Estilos del Modal ---
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'black',
+    // Fondo semitransparente más agradable
+    backgroundColor: 'rgba(0,0,0,0.9)',
+    paddingHorizontal: 12,
   },
   modalImage: {
-    width: '100%',
-    height: '80%', // Ocupa el 80% de la altura
+    width: '92%',
+    height: '72%', // Ocupa el 72% de la altura
+    borderRadius: 12,
   },
-  addButton: {
-    flex: 1,
-    backgroundColor: '#47d81bff',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+  closeButton: {
+    marginTop: 18,
+    backgroundColor: '#fff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  cameraButton: {
-    flex: 1,
-    backgroundColor: '#000000ff',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    textDecorationStyle: 'dotted',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addButtonPressed: {
-    opacity: 0.85,
-  },
-  addButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
+  closeButtonText: {
+    color: '#000',
     fontWeight: '600',
+    fontSize: 16,
   },
-  // El botón de cerrar en el modal se ve mejor con un estilo
-  // (El <Button> de React Native es difícil de estilizar,
-  // pero para el modal, se puede agregar un View alrededor
-  // con un color de fondo si se desea)
 });
