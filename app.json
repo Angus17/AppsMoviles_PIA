@@ -1,13 +1,13 @@
 {
   "expo": {
     "scheme": "migaleria",
-    "name": "MiGaleria",
-    "slug": "MiGaleria",
+    "name": "Galería Multimedia",
+    "slug": "Galería",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/LogoMio.png",
+    "icon": "./assets/images/galeria-logo.png",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
