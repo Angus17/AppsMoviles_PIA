@@ -60,15 +60,8 @@ export default function App() {
   };
 
   // Estado para guardar la lista de fotos.
-  // Empezamos con algunas fotos de ejemplo.
-  const [photos, setPhotos] = useState<PhotoItem[]>([
-    { id: '1', uri: 'https://picsum.photos/id/237/200/200' },
-    { id: '2', uri: 'https://picsum.photos/id/238/200/200' },
-    { id: '3', uri: 'https://picsum.photos/id/239/200/200' },
-    { id: '4', uri: 'https://picsum.photos/id/240/200/200' },
-    { id: '5', uri: 'https://picsum.photos/id/241/200/200' },
-    { id: '6', uri: 'https://picsum.photos/id/242/200/200' },
-  ]);
+  // Iniciamos vacío (sin fotos iniciales por defecto).
+  const [photos, setPhotos] = useState<PhotoItem[]>([]);
 
   // Estado para la imagen seleccionada que se mostrará en el modal
   const [selectedImage, setSelectedImage] = useState<PhotoItem | null>(null);
@@ -199,28 +192,20 @@ export default function App() {
       {/* Botón para agregar nuevas fotos */}
       <View style={styles.buttonRow}>
         <Pressable
-          style={({ pressed }) => [styles.addButton, pressed && styles.addButtonPressed]}
+          style={({ pressed }) => [styles.addButton, darkMode && styles.addButtonDark, pressed && styles.addButtonPressed]}
           onPress={pickImageAsync}
           accessibilityLabel="Agregar foto desde galería"
         >
-          <Ionicons name="images" size={18} color="#fff" />
-          <Text style={styles.addButtonText}>Galería</Text>
+          <Ionicons name="images" size={18} color={darkMode ? '#111' : '#fff'} />
+          <Text style={[styles.addButtonText, darkMode && styles.buttonTextDark]}>Galería</Text>
         </Pressable>
         <Pressable
-          style={({ pressed }) => [styles.cameraButton, pressed && styles.addButtonPressed]}
-          onPress={takePhotoAsync}
-          accessibilityLabel="Tomar foto con cámara"
-        >
-          <Ionicons name="camera" size={18} color="#fff" />
-          <Text style={styles.addButtonText}>Cámara</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [styles.modeButton, pressed && styles.addButtonPressed]}
+          style={({ pressed }) => [styles.modeButton, darkMode && styles.modeButtonDark, pressed && styles.addButtonPressed]}
           onPress={() => setDarkMode(!darkMode)}
           accessibilityLabel="Cambiar modo de color"
         >
-          <Ionicons name={darkMode ? 'sunny' : 'moon'} size={18} color="#fff" />
-          <Text style={styles.addButtonText}>{darkMode ? 'Claro' : 'Oscuro'}</Text>
+          <Ionicons name={darkMode ? 'sunny' : 'moon'} size={18} color={darkMode ? '#111' : '#fff'} />
+          <Text style={[styles.addButtonText, darkMode && styles.buttonTextDark]}>{darkMode ? 'Claro' : 'Oscuro'}</Text>
         </Pressable>
       </View>
 
@@ -260,6 +245,14 @@ export default function App() {
           </View>
         </Modal>
       )}
+      {/* Botón flotante de cámara (FAB) */}
+      <Pressable
+        style={({ pressed }) => [styles.fabCamera, darkMode && styles.fabCameraDark, pressed && styles.fabPressed]}
+        onPress={takePhotoAsync}
+        accessibilityLabel="Tomar foto con cámara"
+      >
+        <Ionicons name="camera" size={24} color={darkMode ? '#111' : '#fff'} />
+      </Pressable>
     </SafeAreaView>
     
   );
@@ -318,21 +311,10 @@ const styles = StyleSheet.create({
     // Sombra Android
     elevation: 3,
   },
-  cameraButton: {
-    flex: 1,
-    flexDirection: 'row',
-    gap: 6,
-    backgroundColor: '#2196F3',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
+  addButtonDark: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#4CAF50',
   },
   modeButton: {
     flex: 1,
@@ -350,6 +332,37 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
+  modeButtonDark: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#9C27B0',
+  },
+  fabCamera: {
+    position: 'absolute',
+    right: 20,
+    bottom: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#2196F3',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Sombras
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 5,
+  },
+  fabCameraDark: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#2196F3',
+  },
+  fabPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
+  },
   addButtonPressed: {
     opacity: 0.85,
     transform: [{ scale: 0.98 }],
@@ -360,6 +373,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
+  },
+  buttonTextDark: {
+    color: '#111',
   },
 
   // --- Lista / cuadrícula ---
