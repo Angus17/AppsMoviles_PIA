@@ -70,5 +70,34 @@ Si necesitas resetear el proyecto, revisa el script en `scripts/reset-project.js
 - Expo CLI (se instala automáticamente al usar `npx expo`)
 - App Expo Go instalada en tu dispositivo (Google Play / App Store)
 
+## 9. Soporte de Foto y Video
+
+La aplicación ahora permite:
+
+- Capturar fotos y videos desde la cámara.
+- Importar imágenes y videos desde la galería.
+- Reproducir videos con controles nativos (migrado a `expo-av`).
+
+
+```bash
+npm install expo-video
+```
+
+Si no usas más `expo-av`, puedes desinstalarlo para evitar dependencias innecesarias:
+
+```bash
+npm uninstall expo-av
+```
+
+### Notas técnicas
+
+- El archivo `app/(tabs)/index.tsx` implementa una capa de compatibilidad para la API antigua de `expo-image-picker` (`MediaTypeOptions`) y la nueva (`MediaType`).
+- Los videos e imágenes se persistirán copiando el archivo al directorio de documentos cuando es posible; si no, se usa el URI original.
+- El manifiesto se guarda en `FileSystem.documentDirectory/photos.json`.
+- Para limpiar datos manualmente, puedes borrar ese archivo usando herramientas del sistema o agregar un script dedicado.
+
+---
+Si agregas nuevas funcionalidades multimedia (miniaturas de video, duración, etc.) documenta aquí los cambios.
+
 ---
 ¡Listo! Con esto deberías poder ver la app en tu dispositivo o emulador.
