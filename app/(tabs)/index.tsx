@@ -181,6 +181,15 @@ export default function App() {
       <Image source={{ uri: item.uri }} style={styles.photo} />
     </TouchableOpacity>
   );
+  // Funcion para eliminar una foto
+  const deletePhoto = (id: string) => {
+    setPhotos(prev => {
+      const updated = prev.filter(p => p.id !== id);
+      persistPhotos(updated); // guardar cambios
+      return updated;
+    });
+    closeModal(); // cerrar modal después de borrar
+  };
 
   return (
     <SafeAreaView style={[styles.container, darkMode && styles.containerDark]}>
@@ -239,14 +248,23 @@ export default function App() {
               style={styles.modalImage}
               resizeMode="contain"
             />
-            <Pressable style={styles.closeButton} onPress={closeModal}>
-              <Text style={styles.closeButtonText}>Cerrar</Text>
-            </Pressable>
+            <View style={styles.modalButtons}>
+              <Pressable style={styles.deleteButton} onPress={() => deletePhoto(selectedImage.id)}>
+                <Text style={styles.deleteButtonText}>Eliminar</Text>
+              </Pressable>
+
+              <Pressable style={styles.closeButton} onPress={closeModal}>
+                <Text style={styles.closeButtonText}>Cerrar</Text>
+              </Pressable>
+            </View>
           </View>
         </Modal>
       )}
     </SafeAreaView>
+    
   );
+
+    
 }
 
 const styles = StyleSheet.create({
@@ -392,4 +410,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     fontSize: 16,
   },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 20,
+  },
+
+  deleteButton: {
+    marginTop: 18,
+    backgroundColor: '#E53935',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+
+  deleteButtonText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
 });
